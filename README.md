@@ -43,3 +43,20 @@ java -jar accoperator-0.0.1-SNAPSHOT.jar
   ERROR:There is no such amount on the balance - на балансе недостаточно денег для снятия.  
   ERROR:Failed to convert value of type... - неверный тип данных передан в параметре.  
   ERROR:Request method '*' not supported - неверный тип запроса.  
+  
+  # БД
+Для создания таблицы в вашей БД, выполните следующий SQL в вашей СУБД
+```
+create table if not exists accounts
+(
+	id bigserial not null
+		constraint accounts_pk
+			primary key,
+	balance numeric
+)
+;
+
+create unique index if not exists accounts_id_uindex
+	on accounts (id)
+;
+```
