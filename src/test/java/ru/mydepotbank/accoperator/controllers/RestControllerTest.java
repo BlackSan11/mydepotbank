@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import ru.mydepotbank.accoperator.models.Account;
-import ru.mydepotbank.accoperator.responses.CustomResponse;
 import ru.mydepotbank.accoperator.services.AccountService;
 import java.math.BigDecimal;
 import static org.junit.Assert.*;
@@ -25,64 +24,64 @@ public class RestControllerTest {
     @Test
     public void createAccount() {
         when(accountService.getExist(anyLong())).thenReturn(true);
-        CustomResponse response = sut.createAccount(7);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        String response = sut.createAccount(7777);
+        assertEquals("ERROR:Account with this 'id' already exist", response);
 
         when(accountService.getExist(anyLong())).thenReturn(false);
-        response = sut.createAccount(77777);
-        assertEquals(CustomResponse.statuses.OK, response.getStatus());
+        response = sut.createAccount(7777);
+        assertEquals("ERROR:The length of the 'id' needs to be 5 characters", response);
 
+        sut.createAccount(77777);
         verify(accountService).addAccount(any());
     }
 
     @Test
     public void putCashToAccount() {
         when(accountService.getExist(anyLong())).thenReturn(false);
-        CustomResponse response = sut.putCashToAccount(7, 300);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        String response = sut.putCashToAccount(7, 300);
+        assertEquals("ERROR:Account with this 'id' does not exist", response);
 
         when(accountService.getExist(anyLong())).thenReturn(true);
         when(accountService.getById(anyLong())).thenReturn(new Account(77777, new BigDecimal(450)));
 
         response = sut.putCashToAccount(7, -154);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        assertEquals("ERROR:Param 'sum' should not be negative", response);
 
         response = sut.putCashToAccount(7, 289);
-        assertEquals(CustomResponse.statuses.OK, response.getStatus());
+        assertEquals("OK", response);
         verify(accountService).editBalance(any());
     }
 
     @Test
     public void withDrawFromAccount() {
         when(accountService.getExist(anyLong())).thenReturn(false);
-        CustomResponse response = sut.withDrawFromAccount(7, 3567);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        String response = sut.withDrawFromAccount(7, 3567);
+        assertEquals("ERROR:Account with this 'id' does not exist", response);
 
         when(accountService.getExist(anyLong())).thenReturn(true);
         when(accountService.getById(anyLong())).thenReturn(new Account(77777, new BigDecimal(450)));
 
         response = sut.withDrawFromAccount(7, -156);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        assertEquals("ERROR:Param 'sum' should not be negative", response);
 
         response = sut.withDrawFromAccount(7, 750);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        assertEquals("ERROR:There is no such amount on the balance", response);
 
         response = sut.withDrawFromAccount(7, 350);
-        assertEquals(CustomResponse.statuses.OK, response.getStatus());
+        assertEquals("OK", response);
         verify(accountService).editBalance(any());
     }
 
     @Test
     public void getAccountBalance() {
-        when(accountService.getExist(anyLong())).thenReturn(true);
         when(accountService.getById(anyLong())).thenReturn(new Account(77777, new BigDecimal(450)));
 
-        CustomResponse response = sut.getAccountBalance(777);
-        assertEquals(CustomResponse.statuses.OK, response.getStatus());
+        when(accountService.getExist(anyLong())).thenReturn(true);
+        String response = sut.getAccountBalance(777);
+        verify(accountService).getById(anyLong());
 
         when(accountService.getExist(anyLong())).thenReturn(false);
-
         response = sut.getAccountBalance(777);
-        assertEquals(CustomResponse.statuses.ERR, response.getStatus());
+        assertEquals("ERROR:Account with this 'id' does not exist", response);
     }
 }

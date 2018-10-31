@@ -9,7 +9,7 @@ public class Account {
 
     @Id
     private long id;
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     public Account() {
     }
